@@ -1,48 +1,44 @@
-<html>
-
-<head>
-<title>Exemplo PHP</title>
-</head>
-<body>
-
 <?php
-ini_set("display_errors", 1);
-header('Content-Type: text/html; charset=iso-8859-1');
+$host = 'db';
+$user = 'root';
+$pass = getenv('MYSQL_ROOT_PASSWORD') ?: 'password123';
+$db   = getenv('MYSQL_DATABASE') ?: 'testdb';
 
+$conn = new mysqli($host, $user, $pass, $db);
 
-
-echo 'Versao Atual do PHP: ' . phpversion() . '<br>';
-
-$servername = "54.234.153.24";
-$username = "root";
-$password = "Senha123";
-$database = "meubanco";
-
-// Criar conexão
-
-
-$link = new mysqli($servername, $username, $password, $database);
-
-/* check connection */
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    exit();
+if ($conn->connect_error) {
+  die('Connection failed: ' . $conn->connect_error);
 }
 
-$valor_rand1 =  rand(1, 999);
-$valor_rand2 = strtoupper(substr(bin2hex(random_bytes(4)), 1));
-$host_name = gethostname();
+// Ensure table exists
+$conn->query(
+  "CREATE TABLE IF NOT EXISTS student (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    enrollment_date DATE NOT NULL,
+    status VARCHAR(20) DEFAULT 'active'
+)");
 
-
-$query = "INSERT INTO dados (AlunoID, Nome, Sobrenome, Endereco, Cidade, Host) VALUES ('$valor_rand1' , '$valor_rand2', '$valor_rand2', '$valor_rand2', '$valor_rand2','$host_name')";
-
-
-if ($link->query($query) === TRUE) {
-  echo "New record created successfully";
-} else {
-  echo "Error: " . $link->error;
+// Insert sample data if table is empty
+$result = $conn->query("SELECT COUNT(*) AS total FROM student");
+$row = $result->fetch_assoc();
+if ((int)$row['total'] === 0) {
+  $conn->query("INSERT INTO student (name, email, enrollment_date) VALUES 
+    ('Alice', 'alice@example.com', '2023-01-01'),
+    ('Bob', 'bob@example.com', '2023-01-02'),
+    ('Carol', 'carol@example.com', '2023-01-03')
+  ");
 }
 
-?>
-</body>
-</html>
+// Fetch and display
+$result = $conn->query("SELECT id, name FROM student ORDER BY id");
+
+echo "<h1>Students</h1>";
+echo "<ul>";
+while ($row = $result->fetch_assoc()) {
+  echo "<li>{$row['id']} - {$row['name']}</li>";
+}
+echo "</ul>";
+
+$conn->close();
