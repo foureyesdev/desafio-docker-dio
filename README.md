@@ -32,8 +32,8 @@ Edite o arquivo `.env` preenchendo as seguintes chaves:
 
 * `MYSQL_ROOT_PASSWORD`
 * `MYSQL_DATABASE`
-* `PMA_USER`
-* `PMA_PASSWORD`
+* `MYSQL_USER`
+* `MYSQL_PASSWORD`
 
 ### 3. Subir a Infraestrutura
 
