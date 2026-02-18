@@ -1,35 +1,46 @@
 name: desafio-docker-dio
 
 services:
+  db:
+    image: mysql:8.0
+    container_name: my-mysql-db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    ports:
+      - "3306:3306"
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: my-php-app
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
     ports:
       - "8080:80"
     volumes:
       - .:/var/www/html/
-
-  db:
-    image: mysql:8.0
-    container_name: my-mysql-db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-    ports:
-      - "3306:3306"
+    depends_on:
+      - db
+      - phpmyadmin
 
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: my-phpmyadmin
     ports:
       - "8081:80"
+    env_file:
+      - .env
     environment:
-      PMA_HOST: db
-      PMA_PORT: 3306
-      PMA_USER: ${PMA_USER}
-      PMA_PASSWORD: ${PMA_PASSWORD}
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - PMA_USER=${MYSQL_USER}
+      - PMA_PASSWORD=${MYSQL_PASSWORD}
     depends_on:
       - db

@@ -1,8 +1,8 @@
 <?php
 $host = 'db';
 $user = 'root';
-$pass = getenv('MYSQL_ROOT_PASSWORD') ?: 'password123';
-$db   = getenv('MYSQL_DATABASE') ?: 'testdb';
+$pass = getenv('MYSQL_ROOT_PASSWORD');
+$db   = getenv('MYSQL_DATABASE');
 
 $conn = new mysqli($host, $user, $pass, $db);
 
